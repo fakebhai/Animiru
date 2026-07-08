@@ -441,7 +441,12 @@ class PlayerActivity : BaseActivity() {
                 )
             } else {
                 window.attributes = window.attributes.apply {
-                    screenBrightness = viewModel.playbackData.value.currentBrightness.coerceIn(0f, 1f)
+                    val brightness = viewModel.playbackData.value.currentBrightness
+                    screenBrightness = if (brightness == -1f) {
+                        WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                    } else {
+                        brightness.coerceIn(0f, 1f)
+                    }
                 }
             }
         } else {

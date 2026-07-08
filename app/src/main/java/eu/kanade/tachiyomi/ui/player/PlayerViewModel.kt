@@ -224,10 +224,9 @@ class PlayerViewModel @JvmOverloads constructor(
                 audioManager.getVolume()
             },
             currentBrightness = if (playerPreferences.rememberPlayerBrightness.get()) {
-                playerPreferences.playerBrightnessValue.get().takeUnless { it == -1f }
-                    ?: brightnessManager.getCurrentBrightness()
+                playerPreferences.playerBrightnessValue.get()
             } else {
-                brightnessManager.getCurrentBrightness()
+                -1f
             },
         ),
     )

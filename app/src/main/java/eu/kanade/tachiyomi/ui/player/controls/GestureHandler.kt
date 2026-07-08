@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eu.kanade.presentation.player.components.LeftSideOvalShape
 import eu.kanade.presentation.player.components.RightSideOvalShape
+import eu.kanade.tachiyomi.ui.player.domain.BrightnessManager
 import eu.kanade.presentation.theme.playerRippleConfiguration
 import eu.kanade.tachiyomi.ui.player.Panels
 import eu.kanade.tachiyomi.ui.player.PlayerViewModel
@@ -64,6 +65,7 @@ fun GestureHandler(
     val playerPreferences = remember { Injekt.get<PlayerPreferences>() }
     val gesturePreferences = remember { Injekt.get<GesturePreferences>() }
     val audioPreferences = remember { Injekt.get<AudioPreferences>() }
+    val brightnessManager = remember { Injekt.get<BrightnessManager>() }
 
     val allowGesturesInPanels by playerPreferences.allowGestures.collectAsState()
     val horizontalGesture by gesturePreferences.gestureHorizontalSeek.collectAsState()
@@ -219,7 +221,11 @@ fun GestureHandler(
                         mpvVolumeStartingY = 0f
                         originalVolume = playbackData.currentVolume
                         originalMPVVolume = currentMPVVolume
-                        originalBrightness = playbackData.currentBrightness
+                        originalBrightness = if (playbackData.currentBrightness == -1f) {
+                            brightnessManager.getCurrentBrightness()
+                        } else {
+                            playbackData.currentBrightness
+                        }
                     },
                 ) { change, amount ->
                     val changeVolume: () -> Unit = {

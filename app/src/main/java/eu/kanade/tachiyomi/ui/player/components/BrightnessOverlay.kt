@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.player.components
 
+import android.view.WindowManager
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.FloatRange
 import androidx.compose.foundation.Canvas
@@ -19,14 +20,18 @@ import kotlin.math.abs
 
 @Composable
 fun BrightnessOverlay(
-    @FloatRange(from = -0.75, to = 1.0) brightness: Float,
+    @FloatRange(from = -1.0, to = 1.0) brightness: Float,
     modifier: Modifier = Modifier,
 ) {
     val activity = LocalActivity.currentOrThrow
     val playerPreferences = remember { Injekt.get<PlayerPreferences>() }
 
     LaunchedEffect(Unit) {
-        if (brightness < 0f) {
+        if (brightness == -1f) {
+            activity.window.attributes = activity.window.attributes.apply {
+                screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+            }
+        } else if (brightness < 0f) {
             activity.window.attributes = activity.window.attributes.apply {
                 screenBrightness = 0f
             }
@@ -34,10 +39,18 @@ fun BrightnessOverlay(
     }
 
     LaunchedEffect(brightness) {
-        if (brightness < 0f) return@LaunchedEffect
-
-        activity.window.attributes = activity.window.attributes.apply {
-            screenBrightness = brightness.coerceIn(0f, 1f)
+        if (brightness == -1f) {
+            activity.window.attributes = activity.window.attributes.apply {
+                screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+            }
+        } else if (brightness >= 0f) {
+            activity.window.attributes = activity.window.attributes.apply {
+                screenBrightness = brightness.coerceIn(0f, 1f)
+            }
+        } else {
+            activity.window.attributes = activity.window.attributes.apply {
+                screenBrightness = 0f
+            }
         }
     }
 
@@ -49,7 +62,7 @@ fun BrightnessOverlay(
         }
     }
 
-    if (brightness < 0) {
+    if (brightness < 0 && brightness != -1f) {
         val brightnessAlpha = remember(brightness) {
             abs(brightness)
         }
